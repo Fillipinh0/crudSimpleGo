@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Cadastro de Cliente</h1>
+    <form method="post" action="/cadastraCliente"> 
+        <input type="text" name="nome" placeholder="Nome" class="input_user">
+        <input type="text" name="telefone" placeholder="Telefone" class="input_user">
+        <input type="text" name="renda" placeholder="Renda" class="input_user">
+        <input type="date" name="data_nascimento" placeholder="Data de Nascimento" class="input_user">
+        <input type="text" name="cep" placeholder="CEP" class="input_user">
+
+        <input type="submit" value="Salvar" class="">
+        <input type="reset" value="Limpar" class="">
+    </form>
+    
+    <h2>Lista de Clientes</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Renda</th>
+                <th>Data de Nascimento</th>
+                <th>CEP</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range . }}
+            <tr>
+                <td>{{ .ID }}</td>
+                <td>{{ .Nome }}</td>
+                <td>{{ .Telefone }}</td>
+                <td>{{ .Renda }}</td>
+                <td>{{ .DataNascimento }}</td>
+                <td>{{ .CEP }}</td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+</body>
+</html>
