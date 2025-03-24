@@ -6,35 +6,38 @@ import (
 )
 
 // Nome Telefone Renda data_nascimento CEP
-type Cliente struct {
-	ID             int
-	Nome           string
-	Telefone       string
-	Renda          string
-	DataNascimento string
-	CEP            string
+type Ativo struct {
+	ID          int
+	Nome        string
+	Localizacao string
+	Descricao   string
+	Status      string
 }
 
-const insereComando string = "INSERT INTO cliente (nome_cliente, telefone_cliente, renda_cliente, data_nascimento_cliente, CEP_cliente) VALUES (?, ?, ?, ?, ?)"
-const selectComando string = "SELECT * FROM cliente"
+const insereComando string = "INSERT INTO ativo (nome_ativo, localização_ativo, descrição_ativo, status_ativo) VALUES (?, ?, ?, ?)"
 
-func InsereCliente(cliente Cliente) {
+const selectComando string = "SELECT * FROM ativo"
+const selectPorNome string = "SELECT * FROM ativo ORDER BY nome_ativo ASC"
+
+const selectPorStatus string = "SELECT * FROM ativo WHERE status_ativo = ?"
+
+func InsereAtivo(ativo Ativo) {
 	conexao := database.ConectaBanco()
 	defer conexao.Close()
 
-	fmt.Printf("Inserindo cliente: %+v\n", cliente)
+	fmt.Printf("Inserindo ativo: %+v\n", ativo)
 
-	resultado, err := conexao.Exec(insereComando, cliente.Nome, cliente.Telefone, cliente.Renda, cliente.DataNascimento, cliente.CEP)
+	resultado, err := conexao.Exec(insereComando, ativo.Nome, ativo.Localizacao, ativo.Descricao, ativo.Status)
 	if err != nil {
-		fmt.Println("Erro ao inserir cliente:", err)
+		fmt.Println("Erro ao inserir ativo:", err)
 		return
 	}
 
 	id, _ := resultado.LastInsertId()
-	fmt.Printf("Cliente inserido com sucesso! ID: %d\n", id)
+	fmt.Printf("Ativo inserido com sucesso! ID: %d\n", id)
 }
 
-func SelecionarClientes() []Cliente {
+func SelecionarAtivo() []Ativo {
 	conexao := database.ConectaBanco()
 	defer conexao.Close()
 
@@ -45,19 +48,90 @@ func SelecionarClientes() []Cliente {
 	}
 	defer resultado.Close()
 
-	var listaClientes []Cliente
+	var listaAtivo []Ativo
 
 	for resultado.Next() {
-		var cliente Cliente
-		erro := resultado.Scan(&cliente.ID, &cliente.Nome, &cliente.Telefone, &cliente.Renda, &cliente.DataNascimento, &cliente.CEP)
+		var ativo Ativo
+		erro := resultado.Scan(&ativo.ID, &ativo.Nome, &ativo.Localizacao, &ativo.Descricao, &ativo.Status)
 		if erro != nil {
 			fmt.Println("Erro ao ler a linha:", erro)
 			continue
 		}
 
-		fmt.Printf("Cliente encontrado: %+v\n", cliente)
-		listaClientes = append(listaClientes, cliente)
+		fmt.Printf("Ativo encontrado: %+v\n", ativo)
+		listaAtivo = append(listaAtivo, ativo)
 	}
 
-	return listaClientes
+	return listaAtivo
+}
+
+func SelecionarAtivoName() []Ativo {
+	conexao := database.ConectaBanco()
+	defer conexao.Close()
+
+	resultado, erro := conexao.Query(selectPorNome)
+	if erro != nil {
+		fmt.Println("Erro ao executar o SELECT:", erro)
+		return nil
+	}
+	defer resultado.Close()
+
+	var listaAtivo []Ativo
+
+	for resultado.Next() {
+		var ativo Ativo
+		erro := resultado.Scan(&ativo.ID, &ativo.Nome, &ativo.Localizacao, &ativo.Descricao, &ativo.Status)
+		if erro != nil {
+			fmt.Println("Erro ao ler a linha:", erro)
+			continue
+		}
+
+		fmt.Printf("Ativo encontrado: %+v\n", ativo)
+		listaAtivo = append(listaAtivo, ativo)
+	}
+
+	return listaAtivo
+}
+
+func FiltrarAtivos(nome string, status string) []Ativo {
+	conexao := database.ConectaBanco()
+	defer conexao.Close()
+
+	var query string
+	var args []interface{}
+
+	// Construir a query dinamicamente com base nos filtros
+	if nome != "" && status != "" {
+		query = "SELECT * FROM ativo WHERE nome_ativo LIKE ? AND status_ativo = ?"
+		args = append(args, "%"+nome+"%", status)
+	} else if nome != "" {
+		query = "SELECT * FROM ativo WHERE nome_ativo LIKE ?"
+		args = append(args, "%"+nome+"%")
+	} else if status != "" {
+		query = "SELECT * FROM ativo WHERE status_ativo = ?"
+		args = append(args, status)
+	} else {
+		query = selectComando // Sem filtros, retorna todos os registros
+	}
+
+	// Executar a consulta
+	resultado, erro := conexao.Query(query, args...)
+	if erro != nil {
+		fmt.Println("Erro ao executar o SELECT:", erro)
+		return nil
+	}
+	defer resultado.Close()
+
+	var listaAtivo []Ativo
+	for resultado.Next() {
+		var ativo Ativo
+		erro := resultado.Scan(&ativo.ID, &ativo.Nome, &ativo.Localizacao, &ativo.Descricao, &ativo.Status)
+		if erro != nil {
+			fmt.Println("Erro ao ler a linha:", erro)
+			continue
+		}
+		listaAtivo = append(listaAtivo, ativo)
+	}
+
+	return listaAtivo
 }

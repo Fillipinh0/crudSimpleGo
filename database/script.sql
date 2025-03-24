@@ -1,13 +1,13 @@
+
+
 CREATE DATABASE IF NOT EXISTS db_trabalho;
 
 USE db_trabalho;
 
-CREATE TABLE IF NOT EXISTS cliente (
-    id_cliente INT PRIMARY KEY auto_increment,
-    nome_cliente VARCHAR(70),
-    telefone_cliente VARCHAR(15),
-    renda_cliente VARCHAR(15),
-    data_nascimento_cliente DATE,
-    CEP_cliente VARCHAR(10)
-
+CREATE TABLE IF NOT EXISTS ativo (
+    id_ativo INT PRIMARY KEY auto_increment,
+    nome_ativo VARCHAR(50),
+    localizacao_ativo VARCHAR(50),
+    descricao_ativo VARCHAR(150),
+    status_ativo VARCHAR(10)
 )
